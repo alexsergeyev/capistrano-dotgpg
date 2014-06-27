@@ -17,3 +17,11 @@ namespace :dotgpg do
     end
   end
 end
+
+# Run dotgpg:env if file not exists on remote host
+namespace :deploy do
+  namespace :check do
+    task :linked_files => '.env'
+  end
+end
+remote_file '.env' => 'dotgpg:env', roles: :app
