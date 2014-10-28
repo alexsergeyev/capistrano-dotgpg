@@ -5,9 +5,12 @@ namespace :dotgpg do
   task :env do
     on roles(:app) do
       dotenv = StringIO.new
-      Array(fetch(:dotgpg_files, [".env.gpg", ".env.#{fetch(:stage)}.gpg"])).each do |file|
-        dotenv <<  %x[bundle exec dotgpg cat #{file}] if File.exists?(file)
-      end
+      decrypted_env = Array(fetch(:dotgpg_files, [".env.gpg", ".env.#{fetch(:stage)}.gpg"])).map do |file|
+        %x[bundle exec dotgpg cat #{file}] if File.exists?(file)
+      end.compact.join("\n")
+
+      next if decrypted_env.empty?
+      dotenv << decrypted_env
 
       Array(fetch(:capistrano_export, %w(shared_path application))).map do |n|
         dotenv << "CAPISTRANO_#{n.upcase}=#{fetch(n.to_sym) || self.send(n.to_sym)}\n"
