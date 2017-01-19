@@ -27,4 +27,3 @@ namespace :deploy do
     task :linked_files => '.env'
   end
 end
-remote_file '.env' => 'dotgpg:env', roles: :app
